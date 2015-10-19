@@ -22,28 +22,36 @@ public class StatStreamTask  implements StreamTask {
 	public void process(IncomingMessageEnvelope envelope, MessageCollector collector, TaskCoordinator coordinator)
 			throws Exception {
 		String message = (String) envelope.getMessage();
-		collector.send(new OutgoingMessageEnvelope(OUTPUT_STREAM, parseStatLog(message)));
+		String result = parseStatLog(message);
+		if(result != null){
+			collector.send(new OutgoingMessageEnvelope(OUTPUT_STREAM, result));
+		}
 	}
 	
 	public String parseStatLog(String message) throws JSONException{
 		JSONObject json = new JSONObject();
 		int count = 0;
 		List<String> title = Lists.newArrayList(Splitter.on(level_1_FS).omitEmptyStrings().split(message));
-		for (int i = 0; i < title.size(); i++) {
-			String t = title.get(i);
-			if (t.indexOf("tmeta_l2:") > -1) {
-				
-			} else {		
-				List<String> tt = Lists.newArrayList(Splitter.on(':').omitEmptyStrings().split(t));
-				String key = tt.get(0);
-				if((count = key.indexOf('|')) > -1){
-					key = key.substring(count + 1, key.length());
-					json.put(key, Long.parseLong(tt.get(1)));
-				}else {
-					json.put(key, tt.get(1));
+		
+		try {
+			for (int i = 0; i < title.size(); i++) {
+				String t = title.get(i);
+				if (t.indexOf("tmeta_l2:") > -1) {
+					
+				} else {		
+					List<String> tt = Lists.newArrayList(Splitter.on(':').omitEmptyStrings().split(t));
+					String key = tt.get(0);
+					if((count = key.indexOf('|')) > -1){
+						key = key.substring(count + 1, key.length());
+						json.put(key, Long.parseLong(tt.get(1)));
+					}else {
+						json.put(key, tt.get(1));
+					}
 				}
-			}
-		}		
+			}		
+		} catch (Exception e) {
+			return null;
+		}
 		return json.toString();
 	}
 }
