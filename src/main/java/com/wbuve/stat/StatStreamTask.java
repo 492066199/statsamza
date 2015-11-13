@@ -13,7 +13,6 @@ import org.apache.samza.system.SystemStream;
 import org.apache.samza.task.MessageCollector;
 import org.apache.samza.task.StreamTask;
 import org.apache.samza.task.TaskCoordinator;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.google.common.base.Splitter;
@@ -22,7 +21,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public class StatStreamTask implements StreamTask {
-	public static final SystemStream OUTPUT_STREAM = new SystemStream("kafka", "uve_stat_handle_log");
+	public final SystemStream OUTPUT_STREAM = new SystemStream("kafka", "uve_stat_handle_log");
 	private static final int skip = 1;
 	
 	private static final String reqtime = "reqtime";
