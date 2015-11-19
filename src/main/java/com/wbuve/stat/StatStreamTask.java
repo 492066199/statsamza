@@ -80,6 +80,7 @@ public class StatStreamTask implements StreamTask{
 				List<String> st1 = Lists.newArrayList(Splitter.on(':').omitEmptyStrings().split(st.get(i)));
 				int st1Count = st1.size(); 
 				String key = st1.get(0).trim();
+				
 				if(st1Count == 2){
 					String value = st1.get(1).trim();
 					if(reqtime.equals(key)){
@@ -115,9 +116,9 @@ public class StatStreamTask implements StreamTask{
 					
 					if(sourceOption.contains(option)){
 						if(option.equals("count")){
-							seJson.put(key, Integer.parseInt(value));
+							seJson.put(option, Integer.parseInt(value));
 						}else {
-							seJson.put(key , value);
+							seJson.put(option , value);
 						}
 					}
 				}
@@ -126,7 +127,7 @@ public class StatStreamTask implements StreamTask{
 			String feedtype = result.optString("feedtype");
 			if(feedtype.startsWith("10009")){
 				result.put("feedtype", "friend");
-			}else if (!feedtype.isEmpty() && !feedtype.equals("nil")&&feedtype.equals("main")){
+			}else if (!feedtype.isEmpty() && !feedtype.equals("nil") && !feedtype.equals("main")){
 				result.put("feedtype", "other");
 			}
 			
@@ -140,6 +141,6 @@ public class StatStreamTask implements StreamTask{
 	public static void main(String[] args) {
 		String tmp = "111.13.89.29|feedtype:main|reqtime:1445875709|uid:2565031883|platform:iphone|version:5.5.0|from:1055093010|uvev:v6/20150822-1|refreshid:618401443132759312|reqid:14458757092712565031883701|loadmore:1|mode:incr|unread_status:25|available_pos:2|source:130|source:10|source:130:error:12204|source:10:error:100|_first_alloc:1|_second_rand:683|_third_rand:432|source:20|source:131|source:20:data:66|source:20:count:1|source:131:count:1|pos:15:to:20|pos:3:to:131|dataunits:2";
 		StatStreamTask task = new StatStreamTask();
-		System.out.println(task.parseStatLog(tmp));
+		task.parseStatLog(tmp);
 	}
 }
