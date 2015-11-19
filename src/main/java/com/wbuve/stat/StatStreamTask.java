@@ -63,8 +63,8 @@ public class StatStreamTask implements StreamTask{
 		String temp = dimens.toString().replace('}', ',');
 		for (JSONObject o : cc) {
 			String os = o.toString();
-			String or = os.substring(1, os.length() -1);
-			collector.send(new OutgoingMessageEnvelope(sourceStream, (or + temp)));
+			String or = os.substring(1, os.length());
+			collector.send(new OutgoingMessageEnvelope(sourceStream, (temp + or)));
 		}
 	}
 	
