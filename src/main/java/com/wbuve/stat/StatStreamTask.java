@@ -52,6 +52,9 @@ public class StatStreamTask implements StreamTask{
 			return;
 		}			
 		Map<String, JSONObject> result = parseStatLog(message);
+		if(result == null){
+			return;
+		}
 		JSONObject dimens = result.get(dimensionsKey);
 		if(dimens == null){
 			return;
@@ -133,6 +136,7 @@ public class StatStreamTask implements StreamTask{
 			
 			return registerMap;
 		} catch (Exception e) {
+			System.err.println("ERROR msg:" + msg);
 			e.printStackTrace();
 			return null;
 		}
