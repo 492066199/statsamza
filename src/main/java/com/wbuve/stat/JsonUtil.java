@@ -9,6 +9,7 @@ public enum JsonUtil {
 	private final String reqtime = "reqtime";
 	private final String count = "count";
 	private String template_short = "";
+	private static final String dataunits = "dataunits";
 	private String template = ""; 
 	{
 		template = buildDimensions();
@@ -21,6 +22,7 @@ public enum JsonUtil {
 			for(String t : StatStreamTask.dimensions){
 				o.put(t, nil);
 			}
+			o.put(dataunits, 0);
 		}catch (JSONException e){
 			
 		}

@@ -1,6 +1,11 @@
 package com.wbuve.stat;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +16,7 @@ import org.apache.samza.system.SystemStream;
 import org.apache.samza.task.MessageCollector;
 import org.apache.samza.task.StreamTask;
 import org.apache.samza.task.TaskCoordinator;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.google.common.base.Splitter;
@@ -26,6 +32,7 @@ public class StatStreamTask implements StreamTask{
 	private static final String reqtime = "reqtime";
 	private static final String source = "source";
 	private static final String sourceId = "sourceId";
+	private static final String dataunits = "dataunits";
 	public static final Set<String> dimensions = Sets.newHashSet(
 			"uid", 
 			"platform",
@@ -103,6 +110,10 @@ public class StatStreamTask implements StreamTask{
 							registerMap.put(serviceId, seJson);
 						}
 					}
+					
+					if(dataunits.equals(key)){
+						result.put(key, Integer.parseInt(value));
+					}
 				}
 				
 				if(st1Count > 2 && source.equals(key)){
@@ -142,9 +153,45 @@ public class StatStreamTask implements StreamTask{
 		}
 	}
 	
-	public static void main(String[] args) {
-		String tmp = "111.13.89.29|feedtype:main|reqtime:1445875709|uid:2565031883|platform:iphone|version:5.5.0|from:1055093010|uvev:v6/20150822-1|refreshid:618401443132759312|reqid:14458757092712565031883701|loadmore:1|mode:incr|unread_status:25|available_pos:2|source:130|source:10|source:130:error:12204|source:10:error:100|_first_alloc:1|_second_rand:683|_third_rand:432|source:20|source:131|source:20:data:66|source:20:count:1|source:131:count:1|pos:15:to:20|pos:3:to:131|dataunits:2";
-		StatStreamTask task = new StatStreamTask();
-		task.parseStatLog(tmp);
+	public static void main(String[] args) throws IOException, JSONException {
+		File file = new File("test1");
+		FileReader fr = new FileReader(file);
+		BufferedReader br = new BufferedReader(fr);
+		Map<String, List<JSONObject>> map = Maps.newHashMap();
+		String tmp = null;
+		int count = 0;
+		while((tmp = br.readLine()) != null){
+			JSONObject obj = new JSONObject(tmp);
+			String uid = obj.getString("uid");
+			if(map.get(uid) == null){
+				map.put(uid, new LinkedList<JSONObject>());
+			}
+			
+			List<JSONObject> j = map.get(uid);
+			boolean f = true;
+			for(JSONObject i : j){
+				if(i.equals(obj)){
+					f = false;
+				}
+			}
+			
+			if(f){
+				j.add(obj);
+			}			
+//			System.out.print(obj.getString("mode"));
+//			System.out.print();
+//			System.out.print(obj.getString("loadmore"));
+//			System.out.print(obj.getString("feedtype"));
+//			System.out.print(obj.getString("from"));
+//			System.out.print(obj.getString("unread_status"));
+//			System.out.print(obj.getString("version"));
+//			System.out.print(obj.getString("platform"));
+//			System.out.print(obj.getLong("reqtime"));
+		}
+		Collection<List<JSONObject>> sj= map.values();
+		for(List<JSONObject> k : sj){
+			count = count + k.size();
+		}
+		System.out.println(count);
 	}
 }
