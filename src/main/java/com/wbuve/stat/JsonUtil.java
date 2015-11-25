@@ -10,6 +10,7 @@ public enum JsonUtil {
 	private final String count = "count";
 	private String template_short = "";
 	private static final String dataunits = "dataunits";
+	private static final String total = "total";
 	private String template = ""; 
 	{
 		template = buildDimensions();
@@ -23,6 +24,7 @@ public enum JsonUtil {
 				o.put(t, nil);
 			}
 			o.put(dataunits, 0);
+			o.put(total, 1);
 		}catch (JSONException e){
 			
 		}
