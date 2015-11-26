@@ -37,7 +37,7 @@ public enum JsonUtil {
 		try {			
 			for (String t : StatStreamTask.sourceOption) {
 				if(t.equals(count)){
-					o.put(count, 0);
+					o.put("feednum", 0);
 				}else {
 					o.put(t, nil);
 				}		

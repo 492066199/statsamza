@@ -130,7 +130,7 @@ public class StatStreamTask implements StreamTask{
 					
 					if(sourceOption.contains(option)){
 						if(option.equals("count")){
-							seJson.put(option, Integer.parseInt(value));
+							seJson.put("feednum", Integer.parseInt(value));
 						}else {
 							seJson.put(option , value);
 						}
@@ -192,6 +192,7 @@ public class StatStreamTask implements StreamTask{
 		for(List<JSONObject> k : sj){
 			count = count + k.size();
 		}
+		br.close();
 		System.out.println(count);
 	}
 }
