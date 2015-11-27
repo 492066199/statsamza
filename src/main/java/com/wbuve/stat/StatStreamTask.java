@@ -98,7 +98,12 @@ public class StatStreamTask implements StreamTask{
 					}
 					
 					if(dimensions.contains(key)){
-						result.put(key, value);
+						if(key.equals("uid")){
+							result.put("uid", Long.parseLong(value));
+						}else {
+							result.put(key, value);
+						}
+						
 					}
 					
 					if(source.equals(key)){

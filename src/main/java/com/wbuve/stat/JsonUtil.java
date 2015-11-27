@@ -1,5 +1,7 @@
 package com.wbuve.stat;
 
+import java.rmi.server.UID;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -25,6 +27,7 @@ public enum JsonUtil {
 			}
 			o.put(dataunits, 0);
 			o.put(total, 1);
+			o.put("uid", 0L);
 		}catch (JSONException e){
 			
 		}
