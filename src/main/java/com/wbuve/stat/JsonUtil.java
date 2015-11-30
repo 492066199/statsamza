@@ -1,7 +1,5 @@
 package com.wbuve.stat;
 
-import java.rmi.server.UID;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 

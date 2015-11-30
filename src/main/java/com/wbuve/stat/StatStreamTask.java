@@ -150,6 +150,13 @@ public class StatStreamTask implements StreamTask{
 				result.put("feedtype", "other");
 			}
 			
+			Integer dataunits_t = result.getInt(dataunits); 
+			if(dataunits_t > 0){
+				result.put("hc", "1");
+			}else {
+				result.put("hc", "0");
+			}
+			
 			return registerMap;
 		} catch (Exception e) {
 			System.err.println("ERROR msg:" + msg);
