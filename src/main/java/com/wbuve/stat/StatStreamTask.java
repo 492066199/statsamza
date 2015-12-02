@@ -121,9 +121,9 @@ public class StatStreamTask implements StreamTask{
 					Integer feedsnum = Integer.parseInt(value.trim());
 					result.put(key, feedsnum);
 					if(feedsnum > 0){
-						result.put("hc", 1);
+						result.put("hc", "1");
 					}else {
-						result.put("hc", 0);
+						result.put("hc", "0");
 					}
 				}
 			}
