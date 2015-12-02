@@ -7,11 +7,10 @@ public enum JsonUtil {
 	INS;
 	private final String nil = "_"; 
 	private final String reqtime = "reqtime";
-	private final String count = "count";
 	private String template_short = "";
-	private static final String dataunits = "dataunits";
 	private static final String total = "total";
 	private String template = ""; 
+
 	{
 		template = buildDimensions();
 		template_short = buildSource();
@@ -23,9 +22,10 @@ public enum JsonUtil {
 			for(String t : StatStreamTask.dimensions){
 				o.put(t, nil);
 			}
-			o.put(dataunits, 0);
+			for(String t : StatStreamTask.metrics){
+				o.put(t, 0);
+			}
 			o.put(total, 1);
-			o.put("uid", 0L);
 		}catch (JSONException e){
 			
 		}
@@ -35,18 +35,6 @@ public enum JsonUtil {
 	
 	private String buildSource(){
 		JSONObject o = new JSONObject();
-		try {			
-			for (String t : StatStreamTask.sourceOption) {
-				if(t.equals(count)){
-					o.put("feednum", 0);
-				}else {
-					o.put(t, nil);
-				}		
-			}
-			o.put("sourceId", nil);
-		} catch (JSONException e) {
-			
-		}
 		return o.toString();
 	}
 	
