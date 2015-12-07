@@ -112,6 +112,7 @@ public class StatStreamTask implements StreamTask{
 			}
 			
 			if(category.equals(key)){
+				result.put(key, value);
 				handleCategoryKey(value, result);
 			}
 			
