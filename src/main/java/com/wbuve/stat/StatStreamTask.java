@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.samza.system.IncomingMessageEnvelope;
@@ -29,13 +30,13 @@ public class StatStreamTask implements StreamTask{
 	private static final char FS = 28;
 	private static final String dimensionsKey = "492066199";
 	private static final String reqtime = "reqtime";
+	private static final String category = "category_r";
 	public static final Set<String> dimensions = Sets.newHashSet(			 
 			"platform",
 			"version",
 			"from",
 			"loadmore",
 			"service_name",
-			"category_r",
 			"product_r"
 			); 
 	
@@ -110,6 +111,10 @@ public class StatStreamTask implements StreamTask{
 				result.put(key, Long.parseLong(value));
 			}
 			
+			if(category.equals(key)){
+				handleCategoryKey(value, result);
+			}
+			
 			if(dimensions.contains(key)){
 				result.put(key, value.trim());
 			}
@@ -134,6 +139,24 @@ public class StatStreamTask implements StreamTask{
 		}		
 		System.out.println(result.toString());
 		return tmeta2;
+	}
+
+	private void handleCategoryKey(String value, JSONObject result) throws JSONException {
+		List<String> categorys = Lists.newArrayList(Splitter.on('|').omitEmptyStrings().split(value));
+		Map<String, Integer> cmap = Maps.newHashMap();
+		for(String c : categorys){
+			String key = c.trim();
+			Integer count = cmap.get(key);
+			if(count == null){
+				cmap.put(key, Integer.valueOf(1));
+			}else {
+				cmap.put(key, count + 1);
+			}
+		}
+		Set<Entry<String, Integer>> entrys = cmap.entrySet();
+		for (Entry<String, Integer> entry : entrys) {
+			result.put(entry.getKey(), String.valueOf(entry.getValue()));
+		}
 	}
 
 	private String removeScribeIp(String msg) {
