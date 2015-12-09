@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,28 +21,14 @@ import org.codehaus.jettison.json.JSONObject;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.wbuve.handle.DataHandleFactory;
+import com.wbuve.template.Constant;
+import com.wbuve.template.JsonUtil;
 
 public class StatStreamTask implements StreamTask{
 	public final SystemStream dimStream = new SystemStream("kafka1", "uve_stat_handle_s1");
-	public final SystemStream sourceStream = new SystemStream("kafka1", "uve_stat_handle_s2");
-	private static final char FS = 28;
-	private static final String dimensionsKey = "492066199";
-	private static final String reqtime = "reqtime";
-	private static final String category = "category_r";
-	public static final Set<String> dimensions = Sets.newHashSet(			 
-			"platform",
-			"version",
-			"from",
-			"loadmore",
-			"service_name",
-			"product_r"
-			); 
-	
-	public static final Set<String> metrics = Sets.newHashSet(
-			"uid",
-			"feedsnum"
-			);
+	public final SystemStream sourceStream = new SystemStream("kafka1", "uve_stat_req");
+	public final SystemStream hcStream = new SystemStream("kafka1", "uve_stat_hc");
 	
 	@Override
 	public void process(IncomingMessageEnvelope envelope,
@@ -53,74 +38,70 @@ public class StatStreamTask implements StreamTask{
 		if(message == null){
 			return;
 		}			
-		Map<String, JSONObject> result = parseStatLog(message);
-		if(result == null){
+		Map<SystemStream, List<String>> resultMap = parseStatLog(message);
+		if(resultMap == null){
 			return;
 		}
-		JSONObject dimens = result.get(dimensionsKey);
-		if(dimens == null){
-			return;
-		}
-		collector.send(new OutgoingMessageEnvelope(dimStream, dimens.toString()));
-		result.remove(dimensionsKey);
 		
-		Collection<JSONObject> cc = result.values();
-		String temp = dimens.toString().replace('}', ',');
-		for (JSONObject o : cc) {
-			String os = o.toString();
-			String or = os.substring(1, os.length());
-			collector.send(new OutgoingMessageEnvelope(sourceStream, (temp + or)));
+		Set<Entry<SystemStream, List<String>>> resultSets = resultMap.entrySet();
+		
+		for(Entry<SystemStream, List<String>> r : resultSets){
+			List<String> resultList = r.getValue();
+			if(resultList != null){
+				for(String sr : resultList){
+					collector.send(new OutgoingMessageEnvelope(r.getKey(), sr));
+				}
+			}
 		}
 	}
 	
-	public Map<String, JSONObject> parseStatLog(String msg){
+	public Map<SystemStream, List<String>> parseStatLog(String msg){
 		try {
-			JSONObject result = JsonUtil.INS.buildDimensionsJson();
-			Map<String, JSONObject> registerMap = Maps.newHashMap();
-			registerMap.put(dimensionsKey, result);
-			
+			Map<SystemStream, List<String>> resultMap = Maps.newHashMap();			
 			msg = removeScribeIp(msg);
-			String secondLevelMsg = handleFirstLevel(msg, result);
-			if(secondLevelMsg != null){
-				handleSecondLevel(secondLevelMsg, registerMap);
+			
+			JSONObject base = JsonUtil.INS.buildDimensionsJson();
+			Map<String, String> firstLevelBack = handleFirstLevel(msg, base);
+			
+			for(String handleKey : DataHandleFactory.INS.handleSort){
+				List<String> branch = DataHandleFactory.INS.handle(handleKey, firstLevelBack.get(handleKey), base);
+				if(branch != null){
+					resultMap.put(sourceStream, branch);
+				}
 			}
 			
-			return registerMap;
+			resultMap.put(this.dimStream, Lists.newArrayList(base.toString()));
+			return resultMap;
 		} catch (Exception e) {
 			System.err.println("ERROR msg:" + msg);
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
-	private String handleSecondLevel(String secondLevelMsg, Map<String, JSONObject> registerMap) {
-		
-		return null;
-	}
 
-	private String handleFirstLevel(String msg, JSONObject result) throws NumberFormatException, JSONException {
-		String tmeta2 = null;
-		List<String> fields = Lists.newArrayList(Splitter.on(FS).omitEmptyStrings().split(msg));
+	private Map<String, String> handleFirstLevel(String msg, JSONObject result) throws NumberFormatException, JSONException {
+		Map<String, String> firstLevelBack = Maps.newHashMap();
+		List<String> fields = Lists.newArrayList(Splitter.on(Constant.FS).omitEmptyStrings().split(msg));
 		for(String field : fields){
 			int sp = field.indexOf(':');
 			String key = field.substring(0, sp);
 			String value = field.substring(sp + 1, field.length());
 			key = key.trim();
 			
-			if(reqtime.equals(key)){
+			if(Constant.reqtime.equals(key)){
 				result.put(key, Long.parseLong(value));
 			}
 			
-			if(category.equals(key)){
+			if(Constant.category.equals(key)){
+				firstLevelBack.put(key, value);
 				result.put(key, value);
-				handleCategoryKey(value, result);
 			}
 			
-			if(dimensions.contains(key)){
+			if(Constant.dimensions.contains(key)){
 				result.put(key, value.trim());
 			}
 			
-			if(metrics.contains(key)){
+			if(Constant.metrics.contains(key)){
 				if(key.equals("uid")){
 					result.put(key, Long.parseLong(value.trim()));
 				}else if(key.equals("feedsnum")){
@@ -134,30 +115,11 @@ public class StatStreamTask implements StreamTask{
 				}
 			}
 			
-			if(key.equals("tmeta_l2")){
-				tmeta2 = value;
+			if(key.equals(Constant.tmeta_l2)){
+				firstLevelBack.put(key, value);
 			}
 		}		
-		System.out.println(result.toString());
-		return tmeta2;
-	}
-
-	private void handleCategoryKey(String value, JSONObject result) throws JSONException {
-		List<String> categorys = Lists.newArrayList(Splitter.on('|').omitEmptyStrings().split(value));
-		Map<String, Integer> cmap = Maps.newHashMap();
-		for(String c : categorys){
-			String key = c.trim();
-			Integer count = cmap.get(key);
-			if(count == null){
-				cmap.put(key, Integer.valueOf(1));
-			}else {
-				cmap.put(key, count + 1);
-			}
-		}
-		Set<Entry<String, Integer>> entrys = cmap.entrySet();
-		for (Entry<String, Integer> entry : entrys) {
-			result.put(entry.getKey(), String.valueOf(entry.getValue()));
-		}
+		return firstLevelBack;
 	}
 
 	private String removeScribeIp(String msg) {
