@@ -70,6 +70,12 @@ public class StatStreamTask implements StreamTask{
 		result.remove(dimensionsKey);
 		
 		Collection<JSONObject> cc = result.values();
+		dimens.remove("version");
+		dimens.remove("dataunits");
+		dimens.remove("hc");
+		dimens.remove("unread_status");
+		dimens.remove("mode");
+		dimens.remove("loadmore");
 		String temp = dimens.toString().replace('}', ',');
 		for (JSONObject o : cc) {
 			String os = o.toString();
