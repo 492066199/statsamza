@@ -78,6 +78,11 @@ public class StatStreamTask implements StreamTask{
 		dimens.remove("loadmore");
 		String temp = dimens.toString().replace('}', ',');
 		for (JSONObject o : cc) {
+			if(o.optInt("feednum") > 0){
+				o.put("hc", "1");
+			}else {
+				o.put("hc", "0");
+			}
 			String os = o.toString();
 			String or = os.substring(1, os.length());
 			collector.send(new OutgoingMessageEnvelope(sourceStream, (temp + or)));
