@@ -8,6 +8,8 @@ public class Constant {
 	public static final char FS = 28;
 	public static final char SOH = 1;
 	public static final char GS = 29;
+	public static final char RS = 30;
+	public static final char US = 31;
 	public static final String reqtime = "reqtime";
 	public static final String category = "category_r";
 	public static final String platform = "platform";
