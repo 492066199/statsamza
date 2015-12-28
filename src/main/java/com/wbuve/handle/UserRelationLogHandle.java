@@ -129,8 +129,15 @@ public class UserRelationLogHandle {
 						
 						if(l3ckey.trim().equals(filter.getIdType())){
 							ss3 = l3cvalue;
+							
+							if(ss3.equals("bo")){
+								ss3 = "3";
+							}else if(ss3.equals("ad")){
+								ss3 = "2";
+							}else if(ss3.equals("nr")){
+								ss3 = "1";
+							}
 						}
-						
 						if(filter.getIdType() == null){
 							ss3 = category_t;
 						}
@@ -163,8 +170,7 @@ public class UserRelationLogHandle {
 		rs.add(containerid);
 		rs.add("");
 		rs.add(String.valueOf(count));
-		rs.add("");
-		rs.add("");
+		rs.add("from=>000001001");
 		return rs;
 	}
 	

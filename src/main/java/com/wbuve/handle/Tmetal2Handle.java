@@ -43,12 +43,12 @@ public class Tmetal2Handle implements IHandleData {
 			}
 		}
 		
-		if(serviceName.equals("account_feed")){
-			String r = userRelationLogHandle.handleAccountFeed(base, objs);
-			if(r != null){
-				rs.add(r);
-			}
-		}
+//		if(serviceName.equals("account_feed")){
+//			String r = userRelationLogHandle.handleAccountFeed(base, objs);
+//			if(r != null){
+//				rs.add(r);
+//			}
+//		}
 		if(rs.size() > 0){
 			return rs;		
 		}
