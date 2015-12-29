@@ -2,12 +2,14 @@ package com.wbuve.handle;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Set;
 
 import org.codehaus.jettison.json.JSONObject;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.wbuve.template.Constant;
 
 public class UserRelationLogHandle {
@@ -15,6 +17,7 @@ public class UserRelationLogHandle {
 	private static final String account_appkey = "631438945";
 	private static final String main_containerid = "000001";
 	private static final String main_appkey = "3206318534";
+	
 	private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public String handleAccountFeed(JSONObject base, List<JSONObject> objs) {
@@ -168,7 +171,15 @@ public class UserRelationLogHandle {
 		}
 		rs.add(appkey);
 		rs.add(containerid);
-		rs.add("");
+		
+		String plat = base.optString(Constant.platform, "");
+		if (plat.equals("pc")){
+			plat = "pc";
+		}else {
+			plat = "client";
+		}
+		
+		rs.add(plat);
 		rs.add(String.valueOf(count));
 		rs.add("from=>000001001");
 		return rs;
