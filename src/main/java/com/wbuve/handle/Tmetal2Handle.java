@@ -1,12 +1,16 @@
 package com.wbuve.handle;
 
 import java.util.List;
+import java.util.Map;
 
+import org.apache.samza.system.SystemStream;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.wbuve.stat.StatStreamTask;
 import com.wbuve.template.Constant;
 
 public class Tmetal2Handle implements IHandleData {
@@ -14,8 +18,13 @@ public class Tmetal2Handle implements IHandleData {
 	public UserRelationLogHandle userRelationLogHandle = new UserRelationLogHandle();
 	
 	@Override
-	public List<String> handleImpl(String value, JSONObject base)
+	public Map<SystemStream, List<String>> handleImpl(String value, JSONObject base, StatStreamTask stream)
 			throws Exception {
+		Map<SystemStream, List<String>> handleMap = Maps.newHashMap();
+		
+		String uid = base.getString("uid");
+		long reqtime = base.getLong("reqtime");
+		String platform = base.getString("platform");
 		
 		List<String> rs = Lists.newArrayList();
 		if(value == null){
@@ -43,16 +52,29 @@ public class Tmetal2Handle implements IHandleData {
 			}
 		}
 		
-//		if(serviceName.equals("account_feed")){
-//			String r = userRelationLogHandle.handleAccountFeed(base, objs);
-//			if(r != null){
-//				rs.add(r);
-//			}
-//		}
-		if(rs.size() > 0){
-			return rs;		
+		List<String> tmate2s = Lists.newArrayList();
+		for(JSONObject tmate2 : objs){
+			JSONObject t = new JSONObject();
+			t.put("uid", uid);
+			t.put("reqtime", reqtime);
+			t.put("platform", platform);
+			
+			t.put("category", tmate2.optString("category","_"));
+			t.put("product", tmate2.optString("product","_"));
+			t.put("type", tmate2.optString("type","_"));
+			
+			tmate2s.add(t.toString());
 		}
-		return null;
+		
+		if(tmate2s.size() > 0){
+			handleMap.put(stream.boStream, tmate2s);
+		}
+		
+		if(rs.size() > 0){
+			handleMap.put(stream.userStream, rs);		
+		}
+		
+		return handleMap;
 	}
 	
 	

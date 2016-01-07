@@ -2,14 +2,12 @@ package com.wbuve.handle;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Set;
 
 import org.codehaus.jettison.json.JSONObject;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.wbuve.template.Constant;
 
 public class UserRelationLogHandle {

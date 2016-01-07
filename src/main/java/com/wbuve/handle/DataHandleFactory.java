@@ -3,10 +3,12 @@ package com.wbuve.handle;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.samza.system.SystemStream;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.wbuve.stat.StatStreamTask;
 import com.wbuve.template.Constant;
 
 public enum DataHandleFactory {
@@ -22,10 +24,10 @@ public enum DataHandleFactory {
 		handleSort.add(Constant.category);
 	}
 	
-	public List<String> handle(String key, String value, JSONObject base) throws Exception {
+	public Map<SystemStream, List<String>> handle(String key, String value, JSONObject base, StatStreamTask stream) throws Exception {
 		IHandleData handle = handles.get(key);
 		if(handle == null)
 			return null;
-		return handle.handleImpl(value, base);
+		return handle.handleImpl(value, base, stream);
 	}
 }

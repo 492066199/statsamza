@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,8 +29,8 @@ import com.wbuve.template.JsonUtil;
 public class StatStreamTask implements StreamTask{
 	public final SystemStream dimStream = new SystemStream("kafka1", "uve_stat_handle_s1");
 	public final SystemStream sourceStream = new SystemStream("kafka1", "uve_stat_req");
-	public final SystemStream hcStream = new SystemStream("kafka1", "uve_stat_hc");
 	public final SystemStream userStream = new SystemStream("kafka", "uve_user_recommendation_log");
+	public final SystemStream boStream = new SystemStream("kafka1", "bo_adid");
 	
 	@Override
 	public void process(IncomingMessageEnvelope envelope,
@@ -65,18 +66,21 @@ public class StatStreamTask implements StreamTask{
 			Map<String, String> firstLevelBack = handleFirstLevel(msg, base);
 			
 			for(String handleKey : DataHandleFactory.INS.handleSort){
-				List<String> branch = DataHandleFactory.INS.handle(handleKey, firstLevelBack.get(handleKey), base);
-				if(branch != null){
-					if(Constant.tmeta_l2.equals(handleKey)){
-						resultMap.put(userStream, branch);
-					}else {
-						resultMap.put(sourceStream, branch);
-					}
-					
+				Map<SystemStream, List<String>> branch = DataHandleFactory.INS.handle(handleKey, firstLevelBack.get(handleKey), base, this);
+				if(branch != null && branch.size() != 0){
+					resultMap.putAll(branch);
 				}
 			}
 			
 			resultMap.put(this.dimStream, Lists.newArrayList(base.toString()));
+			
+//			Collection<List<String>> test = resultMap.values();
+//			for(List<String> t1 : test){
+//				for(String t : t1){
+//					System.out.println(t);
+//				}
+//			}
+			
 			return resultMap;
 		} catch (Exception e) {
 			System.err.println("ERROR msg:" + msg);

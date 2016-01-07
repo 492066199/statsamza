@@ -5,20 +5,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.samza.system.SystemStream;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.wbuve.stat.StatStreamTask;
 import com.wbuve.template.Constant;
 
 public class CategoryHandle implements IHandleData{
 
 	@Override
-	public List<String> handleImpl(String value, JSONObject base) throws JSONException {
+	public Map<SystemStream, List<String>> handleImpl(String value, JSONObject base, StatStreamTask stream) throws JSONException {
+		Map<SystemStream, List<String>> handleMap = Maps.newHashMap();
 		if(value == null){
-			return null;
+			return handleMap;
 		}
 		
 		List<String> rs = Lists.newArrayList();
@@ -79,7 +82,12 @@ public class CategoryHandle implements IHandleData{
 			sb.append('}');
 			rs.add(sb.toString());
 		}
-		return rs;
+		
+		if(rs.size() > 0){
+			handleMap.put(stream.sourceStream , rs);
+		}
+		
+		return handleMap;
 	}
 
 }
