@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,7 +26,7 @@ import com.wbuve.template.Constant;
 import com.wbuve.template.JsonUtil;
 
 public class StatStreamTask implements StreamTask{
-	public final SystemStream dimStream = new SystemStream("kafka1", "uve_stat_handle_s1");
+	public final SystemStream dimStream = new SystemStream("kafka", "uve_stats_reports");
 	public final SystemStream sourceStream = new SystemStream("kafka1", "uve_stat_req");
 	public final SystemStream userStream = new SystemStream("kafka", "uve_user_recommendation_log");
 	public final SystemStream boStream = new SystemStream("kafka1", "bo_adid");
