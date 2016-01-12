@@ -105,9 +105,7 @@ public class StatStreamTask implements StreamTask{
 			}
 			
 			if(Constant.metrics.contains(key)){
-				if(key.equals("uid")){
-					result.put(key, Long.parseLong(value.trim()));
-				}else if(key.equals("feedsnum")){
+				if(key.equals("feedsnum")){
 					Integer feedsnum = Integer.parseInt(value.trim());
 					result.put(key, feedsnum);
 					if(feedsnum > 0){
@@ -115,6 +113,8 @@ public class StatStreamTask implements StreamTask{
 					}else {
 						result.put("hc", "0");
 					}
+				}else{
+					result.put(key, Long.parseLong(value.trim()));
 				}
 			}
 			

@@ -22,7 +22,6 @@ public class Constant {
 			"loadmore",
 			"service_name",
 			"product_r",
-			"unread_status",
 			"category_r",
 			"is_unread_pool"
 			); 
@@ -30,6 +29,7 @@ public class Constant {
 	public static final Set<String> metrics = Sets.newHashSet(
 			"uid",
 			"feedsnum",
+			"unread_status",
 			"available_pos"
 			);
 	public static final String total = "total";

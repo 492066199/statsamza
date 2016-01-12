@@ -25,6 +25,10 @@ public class Tmetal2Handle implements IHandleData {
 		String uid = base.getString("uid");
 		long reqtime = base.getLong("reqtime");
 		String platform = base.getString("platform");
+		String service_name = base.getString("service_name");
+		String is_unread_pool = base.getString("is_unread_pool");
+		String from = base.getString("from");
+		String loadmore = base.getString("loadmore");
 		
 		List<String> rs = Lists.newArrayList();
 		if(value == null){
@@ -58,6 +62,11 @@ public class Tmetal2Handle implements IHandleData {
 			t.put("uid", uid);
 			t.put("reqtime", reqtime);
 			t.put("platform", platform);
+			t.put("service_name", service_name);
+			
+			t.put("is_unread_pool", is_unread_pool);
+			t.put("from", from); 
+			t.put("loadmore", loadmore); 
 			
 			t.put("category", tmate2.optString("category","_"));
 			t.put("product", tmate2.optString("product","_"));
