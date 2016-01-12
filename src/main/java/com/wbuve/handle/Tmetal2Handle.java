@@ -63,6 +63,8 @@ public class Tmetal2Handle implements IHandleData {
 			t.put("product", tmate2.optString("product","_"));
 			t.put("type", tmate2.optString("type","_"));
 			
+			t.put("channel", tmate2.optString("channel","_"));
+			t.put("position", tmate2.optString("position","_"));
 			tmate2s.add(t.toString());
 		}
 		

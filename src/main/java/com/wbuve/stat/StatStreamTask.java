@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,7 +28,6 @@ import com.wbuve.template.JsonUtil;
 
 public class StatStreamTask implements StreamTask{
 	public final SystemStream dimStream = new SystemStream("kafka", "uve_stats_reports");
-	public final SystemStream sourceStream = new SystemStream("kafka1", "uve_stat_req");
 	public final SystemStream userStream = new SystemStream("kafka", "uve_user_recommendation_log");
 	public final SystemStream boStream = new SystemStream("kafka1", "bo_adid");
 	
@@ -73,12 +73,12 @@ public class StatStreamTask implements StreamTask{
 			
 			resultMap.put(this.dimStream, Lists.newArrayList(base.toString()));
 			
-//			Collection<List<String>> test = resultMap.values();
-//			for(List<String> t1 : test){
-//				for(String t : t1){
-//					System.out.println(t);
-//				}
-//			}
+			Collection<List<String>> test = resultMap.values();
+			for(List<String> t1 : test){
+				for(String t : t1){
+					System.out.println(t);
+				}
+			}
 			
 			return resultMap;
 		} catch (Exception e) {
@@ -99,11 +99,6 @@ public class StatStreamTask implements StreamTask{
 			
 			if(Constant.reqtime.equals(key)){
 				result.put(key, Long.parseLong(value));
-			}
-			
-			if(Constant.category.equals(key)){
-				firstLevelBack.put(key, value);
-				result.put(key, value);
 			}
 			
 			if(Constant.dimensions.contains(key)){

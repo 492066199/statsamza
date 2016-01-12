@@ -17,11 +17,9 @@ public enum DataHandleFactory {
 	public final List<String> handleSort = Lists.newArrayList();
 	
 	{
-		handles.put(Constant.category, new CategoryHandle());
 		handles.put(Constant.tmeta_l2, new Tmetal2Handle());
 		
 		handleSort.add(Constant.tmeta_l2);
-		handleSort.add(Constant.category);
 	}
 	
 	public Map<SystemStream, List<String>> handle(String key, String value, JSONObject base, StatStreamTask stream) throws Exception {

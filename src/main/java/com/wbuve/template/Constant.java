@@ -21,12 +21,16 @@ public class Constant {
 			"from",
 			"loadmore",
 			"service_name",
-			"product_r"
+			"product_r",
+			"unread_status",
+			"category_r",
+			"is_unread_pool"
 			); 
 	
 	public static final Set<String> metrics = Sets.newHashSet(
 			"uid",
-			"feedsnum"
+			"feedsnum",
+			"available_pos"
 			);
 	public static final String total = "total";
 	public static final String nil = "_"; 
