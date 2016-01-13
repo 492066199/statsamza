@@ -21,7 +21,6 @@ public enum JsonUtil {
 				o.put(t, 0);
 			}
 			o.put("hc", "0");
-			o.put(Constant.total, 1);
 		}catch (JSONException e){
 			
 		}
