@@ -22,6 +22,7 @@ public class Tmetal2Handle implements IHandleData {
 			throws Exception {
 		Map<SystemStream, List<String>> handleMap = Maps.newHashMap();
 		
+		int feedsnum = base.getInt("feedsnum");
 		String uid = base.getString("uid");
 		long reqtime = base.getLong("reqtime");
 		String platform = base.getString("platform");
@@ -78,6 +79,9 @@ public class Tmetal2Handle implements IHandleData {
 		}
 		
 		if(tmate2s.size() > 0){
+			if(feedsnum != tmate2s.size()){
+				System.out.println("not equel message:" + value);
+			}
 			handleMap.put(stream.boStream, tmate2s);
 		}
 		

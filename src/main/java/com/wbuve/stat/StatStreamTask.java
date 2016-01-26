@@ -114,7 +114,11 @@ public class StatStreamTask implements StreamTask{
 						result.put("hc", "0");
 					}
 				}else{
-					result.put(key, Long.parseLong(value.trim()));
+					long tValue = Long.parseLong(value.trim());
+					if(tValue < 0){
+						tValue = 0;
+					}
+					result.put(key, tValue);
 				}
 			}
 			
