@@ -2,7 +2,9 @@ package com.wbuve.handle;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.samza.system.SystemStream;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -80,7 +82,9 @@ public class Tmetal2Handle implements IHandleData {
 		
 		if(tmate2s.size() > 0){
 			if(feedsnum != tmate2s.size()){
-				System.out.println("not equel message:" + value);
+				if(RandomUtils.nextInt(10000) == 1){
+					System.out.println("not equel message:" + value + " base:" + base.toString());
+				}
 			}
 			handleMap.put(stream.boStream, tmate2s);
 		}
