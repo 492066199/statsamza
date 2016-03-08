@@ -11,46 +11,14 @@ import com.google.common.collect.Lists;
 import com.wbuve.template.Constant;
 
 public class UserRelationLogHandle {
-	private static final String account_containerid = "2306720002_587_2";
-	private static final String account_appkey = "631438945";
+//	private static final String account_containerid = "2306720002_587_2";
+//	private static final String account_appkey = "631438945";
 	private static final String main_containerid = "000001";
 	private static final String main_appkey = "3206318534";
 	
 	private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
-	public String handleAccountFeed(JSONObject base, List<JSONObject> objs) {
-		FilterTool filter = new FilterTool(){
-
-			@Override
-			public String getId() {
-				return null;
-			}
-
-			@Override
-			public String getIdType() {
-				return null;
-			}
-
-			@Override
-			public String getResourceid() {
-				return "resourceid";
-			}
-
-			@Override
-			public boolean filter(String type) {
-				return true;
-			}};
-			
-		List<String> rs = handle(base, objs, filter, account_appkey, account_containerid);
-		if(rs == null){
-			return null;
-		}else {
-			return Joiner.on('\t').join(rs).toString();
-		}
-				
-	}
-	
-	public String handleMainFeed(JSONObject base, List<JSONObject> objs) {
+	public List<String> handleMainFeed(JSONObject base, List<JSONObject> objs) {
 		FilterTool filter = new FilterTool(){
 
 			@Override
@@ -81,10 +49,8 @@ public class UserRelationLogHandle {
 			}};
 			
 		List<String> rs = handle(base, objs, filter, main_appkey, main_containerid);
-		if(rs != null){
-			return Joiner.on('\t').join(rs).toString();
-		}
-		return null;
+		
+		return rs;
 	}
 
 
@@ -94,14 +60,17 @@ public class UserRelationLogHandle {
 			FilterTool filter, String appkey,
 			String containerid) {
 		
-		List<String> rs = Lists.newArrayList();
+		
 		long time = System.currentTimeMillis() / 1000;
 		int count = 0;
 		time = base.optLong("reqtime", time);
 		String timeStr = format.format(time * 1000);
 		String uid = base.optString("uid");
-		StringBuilder sba = new StringBuilder();
+		List<String> final_rs = Lists.newArrayList();
+		
 		for(JSONObject obj : objs){
+			List<String> rs = Lists.newArrayList();
+			StringBuilder sba = new StringBuilder();
 			String l3value = obj.optString("tmeta_l3", null);
 			boolean r = filter.filter(obj.optString("type", null));
 			
@@ -158,29 +127,32 @@ public class UserRelationLogHandle {
 					count ++;
 				}
 			}
+			
+			rs.add(timeStr);
+			rs.add(uid);
+			if(sba.length() > 0){
+				rs.add(sba.substring(0, sba.length() - 1).toString());
+			}else {
+				return null;
+			}
+			rs.add(appkey);
+			rs.add(containerid);
+			
+			String plat = base.optString(Constant.platform, "");
+			if (plat.equals("pc")){
+				plat = "pc";
+			}else {
+				plat = "client";
+			}
+			
+			rs.add(plat);
+			rs.add(String.valueOf(count));
+			count = 0;
+			rs.add("from=>000001001");
+			
+			final_rs.add(Joiner.on('\t').join(rs).toString());
 		}
-		
-		rs.add(timeStr);
-		rs.add(uid);
-		if(sba.length() > 0){
-			rs.add(sba.substring(0, sba.length() - 1).toString());
-		}else {
-			return null;
-		}
-		rs.add(appkey);
-		rs.add(containerid);
-		
-		String plat = base.optString(Constant.platform, "");
-		if (plat.equals("pc")){
-			plat = "pc";
-		}else {
-			plat = "client";
-		}
-		
-		rs.add(plat);
-		rs.add(String.valueOf(count));
-		rs.add("from=>000001001");
-		return rs;
+		return final_rs;
 	}
 	
 	public interface FilterTool{

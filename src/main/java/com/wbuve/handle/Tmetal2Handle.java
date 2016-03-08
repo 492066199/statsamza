@@ -2,7 +2,6 @@ package com.wbuve.handle;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.samza.system.SystemStream;
@@ -52,9 +51,9 @@ public class Tmetal2Handle implements IHandleData {
 		if(serviceName.equals("main_feed")){
 			String productR = base.getString("product_r");
 			if(productR.indexOf("AddFans") > - 1){
-				String r = userRelationLogHandle.handleMainFeed(base, objs);
+				List<String> r = userRelationLogHandle.handleMainFeed(base, objs);
 				if(r != null){
-					rs.add(r);
+					rs.addAll(r);
 				}
 			}
 		}
