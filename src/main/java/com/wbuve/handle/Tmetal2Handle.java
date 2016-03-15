@@ -31,6 +31,7 @@ public class Tmetal2Handle implements IHandleData {
 		String is_unread_pool = base.getString("is_unread_pool");
 		String from = base.getString("from");
 		String loadmore = base.getString("loadmore");
+		String version = base.getString("version");
 		
 		List<String> rs = Lists.newArrayList();
 		if(value == null){
@@ -65,6 +66,8 @@ public class Tmetal2Handle implements IHandleData {
 			t.put("reqtime", reqtime);
 			t.put("platform", platform);
 			t.put("service_name", service_name);
+			t.put("version", version);
+			
 			
 			t.put("is_unread_pool", is_unread_pool);
 			t.put("from", from); 
@@ -80,7 +83,7 @@ public class Tmetal2Handle implements IHandleData {
 		}
 		
 		if(tmate2s.size() > 0){
-			if(feedsnum != tmate2s.size()){
+			if(feedsnum != tmate2s.size() && service_name != "user_recommendation"){
 				if(RandomUtils.nextInt(10000) == 1){
 					System.out.println("not equel message:" + value + " base:" + base.toString());
 				}
