@@ -18,7 +18,7 @@ public class UserRelationLogHandle {
 	
 	private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
-	public List<String> handleMainFeed(JSONObject base, List<JSONObject> objs) {
+	public String handleMainFeed(JSONObject base, JSONObject tmate2) {
 		FilterTool filter = new FilterTool(){
 
 			@Override
@@ -48,7 +48,7 @@ public class UserRelationLogHandle {
 				}					
 			}};
 			
-		List<String> rs = handle(base, objs, filter, main_appkey, main_containerid);
+		String rs = handle(base, tmate2, filter, main_appkey, main_containerid);
 		
 		return rs;
 	}
@@ -56,103 +56,94 @@ public class UserRelationLogHandle {
 
 
 
-	private List<String> handle(JSONObject base, List<JSONObject> objs,
-			FilterTool filter, String appkey,
-			String containerid) {
-		
+	private String handle(JSONObject base, JSONObject tmate2,
+			FilterTool filter, String appkey, String containerid) {
+		List<String> rs = Lists.newArrayList();
+		StringBuilder sba = new StringBuilder();
 		
 		long time = System.currentTimeMillis() / 1000;
 		int count = 0;
 		time = base.optLong("reqtime", time);
 		String timeStr = format.format(time * 1000);
 		String uid = base.optString("uid");
-		List<String> final_rs = Lists.newArrayList();
-		
-		for(JSONObject obj : objs){
-			List<String> rs = Lists.newArrayList();
-			StringBuilder sba = new StringBuilder();
-			String l3value = obj.optString("tmeta_l3", null);
-			boolean r = filter.filter(obj.optString("type", null));
-			
-			String category_t = obj.optString("category", "bo");
-			
-			if(l3value != null && r){
-				List<String> l3oarray = Lists.newArrayList(Splitter.on(Constant.RS).omitEmptyStrings().split(l3value));
-				for(String l3o : l3oarray){
-					List<String> l3cs = Lists.newArrayList(Splitter.on(Constant.US).omitEmptyStrings().split(l3o));
-					String ss1 = "";  
-					String ss2 = "";  
-					String ss3 = "";  
-					
-					for(String l3c : l3cs){						
-						int sp = l3c.indexOf(':');
-						String l3ckey = l3c.substring(0, sp);
-						String l3cvalue = l3c.substring(sp + 1, l3c.length());
-						
-						if(l3ckey.trim().equals(filter.getResourceid())){
-							ss1 = l3cvalue;							
-						}
-						
-						if(l3ckey.trim().equals(filter.getId())){
-							ss2 = l3cvalue;
-						}
-						
-						if(l3ckey.trim().equals(filter.getIdType())){
-							ss3 = l3cvalue;
-							
-							if(ss3.equals("bo")){
-								ss3 = "3";
-							}else if(ss3.equals("ad")){
-								ss3 = "2";
-							}else if(ss3.equals("nr")){
-								ss3 = "1";
-							}
-						}
-						if(filter.getIdType() == null){
-							ss3 = category_t;
+		String category_t = tmate2.optString("category", "bo");
+		String l3value = tmate2.optString("tmeta_l3", "");
+		boolean r = filter.filter(tmate2.optString("type", null));
+
+		if (l3value != null && r) {
+			for (String l3o : Splitter.on(Constant.RS).omitEmptyStrings().split(l3value)) {
+				List<String> l3cs = Lists.newArrayList(Splitter.on(Constant.US)
+						.omitEmptyStrings().split(l3o));
+				String ss1 = "";
+				String ss2 = "";
+				String ss3 = "";
+
+				for (String l3c : l3cs) {
+					int sp = l3c.indexOf(':');
+					String l3ckey = l3c.substring(0, sp);
+					String l3cvalue = l3c.substring(sp + 1, l3c.length());
+
+					if (l3ckey.trim().equals(filter.getResourceid())) {
+						ss1 = l3cvalue;
+					}
+
+					if (l3ckey.trim().equals(filter.getId())) {
+						ss2 = l3cvalue;
+					}
+
+					if (l3ckey.trim().equals(filter.getIdType())) {
+						ss3 = l3cvalue;
+
+						if (ss3.equals("bo")) {
+							ss3 = "3";
+						} else if (ss3.equals("ad")) {
+							ss3 = "2";
+						} else if (ss3.equals("nr")) {
+							ss3 = "1";
 						}
 					}
-					
-					if(ss1.isEmpty()){
-						continue;
+					if (filter.getIdType() == null) {
+						ss3 = category_t;
 					}
-					
-					StringBuilder sbc = new StringBuilder(80);
-					sbc.append(ss1);
-					sbc.append('|');
-					sbc.append(ss2);
-					sbc.append('|');
-					sbc.append(ss3);
-					sba.append(sbc).append(',');
-					count ++;
 				}
+
+				if (ss1.isEmpty()) {
+					continue;
+				}
+
+				StringBuilder sbc = new StringBuilder(80);
+				sbc.append(ss1);
+				sbc.append('|');
+				sbc.append(ss2);
+				sbc.append('|');
+				sbc.append(ss3);
+				sba.append(sbc).append(',');
+				count++;
 			}
-			
-			rs.add(timeStr);
-			rs.add(uid);
-			if(sba.length() > 0){
-				rs.add(sba.substring(0, sba.length() - 1).toString());
-			}else {
-				return null;
-			}
-			rs.add(appkey);
-			rs.add(containerid);
-			
-			String plat = base.optString(Constant.platform, "");
-			if (plat.equals("pc")){
-				plat = "pc";
-			}else {
-				plat = "client";
-			}
-			
-			rs.add(plat);
-			rs.add(String.valueOf(count));
-			count = 0;
-			rs.add("from=>000001001");
-			
-			final_rs.add(Joiner.on('\t').join(rs).toString());
 		}
-		return final_rs;
+
+		rs.add(timeStr);
+		rs.add(uid);
+		if (sba.length() > 0) {
+			rs.add(sba.substring(0, sba.length() - 1).toString());
+		} else {
+			return null;
+		}
+		rs.add(appkey);
+		rs.add(containerid);
+
+		String plat = base.optString(Constant.platform, "");
+		if (plat.equals("pc")) {
+			plat = "pc";
+		} else {
+			plat = "client";
+		}
+
+		rs.add(plat);
+		rs.add(String.valueOf(count));
+		rs.add("from=>000001001");
+
+		return Joiner.on('\t').join(rs).toString();
 	}
 	
 	public interface FilterTool{

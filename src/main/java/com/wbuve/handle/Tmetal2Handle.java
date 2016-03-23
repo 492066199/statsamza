@@ -14,15 +14,13 @@ import com.google.common.collect.Maps;
 import com.wbuve.stat.StatStreamTask;
 import com.wbuve.template.Constant;
 
-public class Tmetal2Handle implements IHandleData {
-	public static final String category = "category";
-	public UserRelationLogHandle userRelationLogHandle = new UserRelationLogHandle();
+public class Tmetal2Handle  {
 	
-	@Override
-	public Map<SystemStream, List<String>> handleImpl(String value, JSONObject base, StatStreamTask stream)
+	public UserRelationLogHandle userRelationLogHandle = new UserRelationLogHandle();
+	public Map<SystemStream, List<String>> handle(String value, JSONObject base, StatStreamTask stream)
 			throws Exception {
-		Map<SystemStream, List<String>> handleMap = Maps.newHashMap();
 		
+		Map<SystemStream, List<String>> handleMap = Maps.newHashMap();
 		int feedsnum = base.getInt("feedsnum");
 		String uid = base.getString("uid");
 		long reqtime = base.getLong("reqtime");
@@ -32,54 +30,70 @@ public class Tmetal2Handle implements IHandleData {
 		String from = base.getString("from");
 		String loadmore = base.getString("loadmore");
 		String version = base.getString("version");
+		String serviceName = base.getString("service_name");
 		
-		List<String> rs = Lists.newArrayList();
-		if(value == null){
-			base.put("category_imp", Constant.nil);
+		base.put("category_imp", Constant.nil);
+		base.put("product_imp", Constant.nil);
+		
+		if(value == null){	
 			return null;
 		}
-		
-		List<String> vArray = Lists.newArrayList(Splitter.on(Constant.SOH).omitEmptyStrings().split(value));
+				
 		StringBuilder categoryImp = new StringBuilder(); 
-		List<JSONObject> objs = handleVArray(vArray, categoryImp);
-		if(categoryImp.length() > 0){
-			base.put("category_imp", categoryImp.substring(1));
-		}else {
-			base.put("category_imp", Constant.nil);
-		}
-		
-		String serviceName = base.getString("service_name");
-		if(serviceName.equals("main_feed")){
-			String productR = base.getString("product_r");
-			if(productR.indexOf("AddFans") > - 1){
-				List<String> r = userRelationLogHandle.handleMainFeed(base, objs);
-				if(r != null){
-					rs.addAll(r);
-				}
-			}
-		}
-		
+		StringBuilder productImp = new StringBuilder(); 
+		List<String> rs = Lists.newArrayList();
 		List<String> tmate2s = Lists.newArrayList();
-		for(JSONObject tmate2 : objs){
+
+		List<JSONObject> tmetal2Jsons = handletmetal2s(value);
+		
+		for(JSONObject tmatel2Json : tmetal2Jsons){
 			JSONObject t = new JSONObject();
 			t.put("uid", uid);
 			t.put("reqtime", reqtime);
 			t.put("platform", platform);
 			t.put("service_name", service_name);
-			t.put("version", version);
-			
-			
+			t.put("version", version);			
 			t.put("is_unread_pool", is_unread_pool);
 			t.put("from", from); 
-			t.put("loadmore", loadmore); 
+			t.put("loadmore", loadmore); 			
+			t.put("category", tmatel2Json.optString("category","_"));
+			t.put("product", tmatel2Json.optString("product","_"));
+			t.put("type", tmatel2Json.optString("type","_"));
+			t.put("channel", tmatel2Json.optString("channel","_"));
+			t.put("position", tmatel2Json.optString("position","_"));
 			
-			t.put("category", tmate2.optString("category","_"));
-			t.put("product", tmate2.optString("product","_"));
-			t.put("type", tmate2.optString("type","_"));
+			String tmetaL3 = tmatel2Json.optString("tmeta_l3", "");
+			int cardnum = calctmetal3CardNum(tmetaL3);
+			t.put("cardnum", cardnum);
 			
-			t.put("channel", tmate2.optString("channel","_"));
-			t.put("position", tmate2.optString("position","_"));
+			String tCategory = tmatel2Json.optString("category", "");
+			if(!tCategory.isEmpty()){
+				categoryImp.append('|');
+				categoryImp.append(tCategory);
+			}
+
+			String tProduct = tmatel2Json.optString("product", "");
+			if(!tCategory.isEmpty()){
+				productImp.append('|');
+				productImp.append(tProduct);
+			}
+			
+			if(tProduct.indexOf("AddFans") > -1 && serviceName.equals("main_feed")){
+				String r = userRelationLogHandle.handleMainFeed(base, tmatel2Json);
+				if(r != null){
+					rs.add(r);
+				}
+			}
+			
 			tmate2s.add(t.toString());
+		}
+		
+		if(categoryImp.length() > 0){
+			base.put("category_imp", categoryImp.substring(1));
+		}
+
+		if(productImp.length() > 0){
+			base.put("product_imp", productImp.substring(1));
 		}
 		
 		if(tmate2s.size() > 0){
@@ -100,28 +114,32 @@ public class Tmetal2Handle implements IHandleData {
 	
 	
 	
-	private List<JSONObject> handleVArray(List<String> vArray, StringBuilder categoryImp) {
-		List<JSONObject> objs = Lists.newArrayList();
-		for(String v : vArray){
-			JSONObject obj = new JSONObject();
-			List<String> csArray = Lists.newArrayList(Splitter.on(Constant.GS).omitEmptyStrings().split(v));
-			for(String cs : csArray){
+	private int calctmetal3CardNum(String tmetal3Str) {
+		if(tmetal3Str == null || tmetal3Str.isEmpty()){
+			return 0;
+		}
+		List<String> s = Lists.newArrayList(Splitter.on(Constant.RS).omitEmptyStrings().split(tmetal3Str));
+		return s.size();
+	}
+
+
+	private List<JSONObject> handletmetal2s(String value) {
+		List<JSONObject> tmetal2Jsons = Lists.newArrayList();
+		
+		for(String tmetal2 : Splitter.on(Constant.SOH).omitEmptyStrings().split(value)){
+			JSONObject tmetal2json = new JSONObject();
+			for(String cs : Splitter.on(Constant.GS).omitEmptyStrings().split(tmetal2)){
 				int sp = cs.indexOf(':');
 				String subkey = cs.substring(0, sp);
 				String subvalue = cs.substring(sp + 1, cs.length());
-				if(subkey.equals(category)){
-					categoryImp.append('|');
-					categoryImp.append(subvalue);
-				}
 				try {
-					obj.put(subkey, subvalue);
+					tmetal2json.put(subkey, subvalue);
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
 			}
-			objs.add(obj);
+			tmetal2Jsons.add(tmetal2json);
 		}
-		return objs;
+		return tmetal2Jsons;
 	}
-	
 }

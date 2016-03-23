@@ -21,14 +21,14 @@ import org.codehaus.jettison.json.JSONObject;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.wbuve.handle.DataHandleFactory;
+import com.wbuve.handle.Tmetal2Handle;
 import com.wbuve.template.Constant;
 import com.wbuve.template.JsonUtil;
 
 public class StatStreamTask implements StreamTask{
 	public final SystemStream dimStream = new SystemStream("kafka", "uve_stats_reports");
 	public final SystemStream userStream = new SystemStream("kafka", "uve_user_recommendation_log");
-	public final SystemStream boStream = new SystemStream("kafka1", "bo_adid");
+	public final SystemStream boStream = new SystemStream("kafka", "uve_impression_reports");
 	
 	@Override
 	public void process(IncomingMessageEnvelope envelope,
@@ -63,8 +63,9 @@ public class StatStreamTask implements StreamTask{
 			JSONObject base = JsonUtil.INS.buildDimensionsJson();
 			Map<String, String> firstLevelBack = handleFirstLevel(msg, base);
 			
-			for(String handleKey : DataHandleFactory.INS.handleSort){
-				Map<SystemStream, List<String>> branch = DataHandleFactory.INS.handle(handleKey, firstLevelBack.get(handleKey), base, this);
+			String tmatel2sStr = firstLevelBack.get(Constant.tmeta_l2);
+			if(tmatel2sStr != null && !tmatel2sStr.isEmpty()){
+				Map<SystemStream, List<String>> branch = new Tmetal2Handle().handle(tmatel2sStr, base, this);
 				if(branch != null && branch.size() != 0){
 					resultMap.putAll(branch);
 				}
@@ -89,41 +90,42 @@ public class StatStreamTask implements StreamTask{
 
 	private Map<String, String> handleFirstLevel(String msg, JSONObject result) throws NumberFormatException, JSONException {
 		Map<String, String> firstLevelBack = Maps.newHashMap();
-		List<String> fields = Lists.newArrayList(Splitter.on(Constant.FS).omitEmptyStrings().split(msg));
-		for(String field : fields){
+		for(String field : Splitter.on(Constant.FS).omitEmptyStrings().split(msg)){
 			int sp = field.indexOf(':');
-			String key = field.substring(0, sp);
-			String value = field.substring(sp + 1, field.length());
-			key = key.trim();
-			
-			if(Constant.reqtime.equals(key)){
-				result.put(key, Long.parseLong(value));
-			}
-			
-			if(Constant.dimensions.contains(key)){
-				result.put(key, value.trim());
-			}
-			
-			if(Constant.metrics.contains(key)){
-				if(key.equals("feedsnum")){
-					Integer feedsnum = Integer.parseInt(value.trim());
-					result.put(key, feedsnum);
-					if(feedsnum > 0){
-						result.put("hc", "1");
-					}else {
-						result.put("hc", "0");
-					}
-				}else{
-					long tValue = Long.parseLong(value.trim());
-					if(tValue < 0){
-						tValue = 0;
-					}
-					result.put(key, tValue);
+			if(sp > -1){
+				String key = field.substring(0, sp);
+				String value = field.substring(sp + 1, field.length());
+				key = key.trim();
+				
+				if(Constant.reqtime.equals(key)){
+					result.put(key, Long.parseLong(value));
 				}
-			}
-			
-			if(key.equals(Constant.tmeta_l2)){
-				firstLevelBack.put(key, value);
+				
+				if(Constant.dimensions.contains(key)){
+					result.put(key, value.trim());
+				}
+				
+				if(Constant.metrics.contains(key)){
+					if(key.equals("feedsnum")){
+						Integer feedsnum = Integer.parseInt(value.trim());
+						result.put(key, feedsnum);
+						if(feedsnum > 0){
+							result.put("hc", "1");
+						}else {
+							result.put("hc", "0");
+						}
+					}else{
+						long tValue = Long.parseLong(value.trim());
+						if(tValue < 0){
+							tValue = 0;
+						}
+						result.put(key, tValue);
+					}
+				}
+				
+				if(key.equals(Constant.tmeta_l2)){
+					firstLevelBack.put(key, value);
+				}
 			}
 		}		
 		return firstLevelBack;
