@@ -73,7 +73,7 @@ public class Tmetal2Handle  {
 			}
 
 			String tProduct = tmatel2Json.optString("product", "");
-			if(!tCategory.isEmpty()){
+			if(!tProduct.isEmpty()){
 				productImp.append('|');
 				productImp.append(tProduct);
 			}
