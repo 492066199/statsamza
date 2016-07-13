@@ -1,5 +1,6 @@
 
 ###sina uve data handle samza application
+
 * you must install yarn,zookeeper and kafka first
 * use mvn clean package
 * then tar -zxf ./target/statsamza-0.0.1-SNAPSHOT-dist.tar.gz 
